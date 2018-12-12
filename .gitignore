@@ -105,3 +105,7 @@ ENV/
 kg_quora_insincere_questions_classification/data/source
 kg_quora_insincere_questions_classification/data/log
 kg_quora_insincere_questions_classification/data/model
+.travis.yml
+.editorconfig
+.idea
+.github
