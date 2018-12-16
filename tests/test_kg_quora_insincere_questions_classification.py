@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Tests for `kg_quora_insincere_questions_classification` package."""
+"""Tests for `kg_quora_insincere_questions_classification` packages."""
 
 
 import unittest
@@ -12,7 +12,7 @@ from kg_quora_insincere_questions_classification import cli
 
 
 class TestKg_quora_insincere_questions_classification(unittest.TestCase):
-    """Tests for `kg_quora_insincere_questions_classification` package."""
+    """Tests for `kg_quora_insincere_questions_classification` packages."""
 
     def setUp(self):
         """Set up test fixtures, if any."""
