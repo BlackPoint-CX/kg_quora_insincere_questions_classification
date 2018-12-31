@@ -144,9 +144,9 @@ class Model(object):
 
     def train(self, sess):
         assert self.hparams.mode == ModeKeys.TRAIN
-        train_tuple = TrainOutputTuple(train_summary=self.train_summary,
-                                       train_loss=self.train_loss,
-                                       global_step=self.global_step,
-                                       batch_size=self.hparams.batch_size,
-                                       grad_norm=self.gradient_norm)
-        return sess.run([self.update, train_tuple])
+        train_output_tuple = TrainOutputTuple(train_summary=self.train_summary,
+                                              train_loss=self.train_loss,
+                                              global_step=self.global_step,
+                                              batch_size=self.hparams.batch_size,
+                                              grad_norm=self.gradient_norm)
+        return sess.run([self.update, train_output_tuple])

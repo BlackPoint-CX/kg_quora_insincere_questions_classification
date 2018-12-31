@@ -1,7 +1,7 @@
 import os
 from collections import defaultdict
 import re
-import tensorflow as tf
+
 import codecs
 import logging
 import pandas as pd
@@ -10,7 +10,8 @@ from tensorflow.python.ops.lookup_ops import index_table_from_file
 
 from config_utils import LOG_DIR, SOURCE_DIR, EMBEDDING_DIR
 
-logging.basicConfig(filename=os.path.join(LOG_DIR, 'vocab_utils.log'))
+logging.basicConfig(filename=os.path.join(LOG_DIR, 'vocab_utils.log'),
+                    filemode='w+')
 
 VOCAB_SIZE_THRESHOLD_CPU = 50000
 UNK_IND = 0

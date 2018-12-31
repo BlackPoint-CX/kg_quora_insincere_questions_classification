@@ -15,9 +15,9 @@ PROJECT_DIR = os.path.join(REPO_DIR,
 
 DATA_DIR = os.path.join(PROJECT_DIR, 'data')
 SRC_DIR = os.path.join(PROJECT_DIR, 'src')
-LOG_DIR = os.path.join(PROJECT_DIR,'log')
-MODEL_DIR = os.path.join(PROJECT_DIR,'model')
-
+LOG_DIR = os.path.join(PROJECT_DIR, 'log')
+MODEL_DIR = os.path.join(PROJECT_DIR, 'model')
+SUMMARY_DIR = os.path.join(PROJECT_DIR, 'summary')
 
 SOURCE_DIR = os.path.join(DATA_DIR, 'source')
 EMBEDDING_DIR = os.path.join(DATA_DIR, 'embedding')

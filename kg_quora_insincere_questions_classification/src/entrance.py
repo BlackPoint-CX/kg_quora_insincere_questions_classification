@@ -36,6 +36,7 @@ def build_argparser(argument_parser):
     argument_parser.add_argument('--batch_size', type=int, default=64, help='num of batch size.')
     argument_parser.add_argument('--log_dir', type=str, default=LOG_DIR, help='directory of logs.')
     argument_parser.add_argument('--model_dir', type=str, default=MODEL_DIR, help='directory of models.')
+    argument_parser.add_argument('--num_train_steps', type=int, default=10000, help='num of train steps.')
 
 
 def build_hparams(flags):
@@ -61,7 +62,8 @@ def build_hparams(flags):
         clip_norm=flags.clip_norm,
         batch_size=flags.batch_size,
         log_dir=flags.LOG_DIR,
-        model_dir=flags.MODEL_DIR
+        model_dir=flags.MODEL_DIR,
+        num_train_steps=flags.num_train_steps
     )
 
 
