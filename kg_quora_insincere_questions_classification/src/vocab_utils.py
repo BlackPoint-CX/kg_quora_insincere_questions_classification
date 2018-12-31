@@ -1,7 +1,7 @@
 import os
 from collections import defaultdict
 import re
-
+import tensorflow as tf
 import codecs
 import logging
 import pandas as pd
