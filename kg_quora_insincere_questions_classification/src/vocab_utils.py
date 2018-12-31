@@ -6,11 +6,14 @@ import codecs
 import logging
 import pandas as pd
 import numpy as np
+from tensorflow.python.ops.lookup_ops import index_table_from_file
+
 from config_utils import LOG_DIR, SOURCE_DIR, EMBEDDING_DIR
 
 logging.basicConfig(filename=os.path.join(LOG_DIR, 'vocab_utils.log'))
 
 VOCAB_SIZE_THRESHOLD_CPU = 50000
+UNK_IND = 0
 
 
 # question_text =
@@ -169,10 +172,11 @@ def build_vocab_file():
             w_file.write('%s\n' % word)
 
 
-def filter_valid_embedding():
-    with codecs.getreader('utf-8')(open(os.path.join(EMBEDDING_DIR, 'glove.840B.300d.txt'))) as r_file:
-        for line in r_file:
-            eles = line.split(' ')
-            word = eles[0]
-            if word in word_count_dict:
-                pass
+def build_vocab_table(vocab_file):
+    """
+    Create vocab table from vocabulary file.
+    :param vocab_file:
+    :return:
+    """
+    vocab_table = index_table_from_file(vocab_file, default_value=UNK_IND)
+    return vocab_table

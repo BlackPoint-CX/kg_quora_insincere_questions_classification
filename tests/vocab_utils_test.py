@@ -1,3 +1,4 @@
+import codecs
 import os
 import unittest
 import tensorflow as tf
@@ -12,6 +13,20 @@ class VocabUtilsTest(unittest.TestCase):
         self.assertEqual(num_words, 2196017)
         self.assertEqual(embedding_dim, 300)
 
+    def test_build_vocab_table(self):
+        # TODO not finished yet.
+        vocab_dir = os.path.join(tf.test.get_temp_dir(), 'vocab_dir')
+        os.makedirs(vocab_dir)
+        vocab_file = os.path.join(vocab_dir, 'vocab.txt')
+        vocab = ['a', 'b', 'c']
+        with codecs.getwriter('utf-8')(tf.gfile.GFile(vocab_file, 'wb')) as w_file:
+            for word in vocab:
+                w_file.write('%s\n' % word)
+
+        out_dir = os.path.join(tf.test.get_temp_dir(), 'out_dir')
+        os.makedirs(out_dir)
+        self.assertEqual('', '')
+
 
 class VocabUtilsTFTest(tf.test.TestCase):
     def test_build_or_load_embedding_case_0(self):
@@ -19,7 +34,6 @@ class VocabUtilsTFTest(tf.test.TestCase):
 
     def test_build_or_load_embedding_case_1(self):
         pass
-
 
 
 def main():

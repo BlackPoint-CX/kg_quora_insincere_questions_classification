@@ -9,7 +9,8 @@ import vocab_utils
 from collections import namedtuple
 
 
-class TrainTuple(namedtuple('TrainTuple', ['train_summary', 'train_loss', 'global_step', 'batch_size', 'grad_norm'])):
+class TrainOutputTuple(
+    namedtuple('TrainOutputTuple', ['train_summary', 'train_loss', 'global_step', 'batch_size', 'grad_norm'])):
     pass
 
 
@@ -72,7 +73,7 @@ class Model(object):
         return logits, predicts
 
     def build_loss(self):
-        cross_ent = sparse_softmax_cross_entropy_with_logits(self.logits, self.iterator.target)
+        cross_ent = sparse_softmax_cross_entropy_with_logits(self.logits, self.iterator.label)
         loss = tf.reduce_mean(cross_ent)
         return loss
 
@@ -122,7 +123,7 @@ class Model(object):
                                                                 decay_rate=self.hparams.decay_rate,
                                                                 staircase=False)
 
-                gradients = tf.gradients(ys=self.iterator.target, xs=params)
+                gradients = tf.gradients(ys=self.iterator.label, xs=params)
                 self.clipped_gradients, self.gradient_norm = tf.clip_by_global_norm(t_list=gradients,
                                                                                     clip_norm=self.hparams.clip_norm)
                 self.gradient_norm_summary = [tf.summary.scalar('grad_norm', self.gradient_norm),
@@ -143,9 +144,9 @@ class Model(object):
 
     def train(self, sess):
         assert self.hparams.mode == ModeKeys.TRAIN
-        train_tuple = TrainTuple(train_summary=self.train_summary,
-                                 train_loss=self.train_loss,
-                                 global_step=self.global_step,
-                                 batch_size=self.hparams.batch_size,
-                                 grad_norm=self.gradient_norm)
+        train_tuple = TrainOutputTuple(train_summary=self.train_summary,
+                                       train_loss=self.train_loss,
+                                       global_step=self.global_step,
+                                       batch_size=self.hparams.batch_size,
+                                       grad_norm=self.gradient_norm)
         return sess.run([self.update, train_tuple])

@@ -1,10 +1,21 @@
+from collections import namedtuple
+
 import tensorflow as tf
+from tensorflow.contrib.data import CsvDataset
 from tensorflow.contrib.rnn import LayerNormBasicLSTMCell, DropoutWrapper, DeviceWrapper, MultiRNNCell
 import logging
 import os
-from config_utils import LOG_DIR
 
-logging.basicConfig(filename=os.path.join(LOG_DIR,'model_helper.log'))
+import iterator_utils
+from config_utils import LOG_DIR
+from model import Model
+from vocab_utils import build_vocab_table
+
+logging.basicConfig(filename=os.path.join(LOG_DIR, 'model_helper.log'))
+
+
+class TrainTuple(namedtuple('TrainTuple', ['graph', 'model', 'iterator'])):
+    pass
 
 
 def build_single_cell(cell_type, learning_rate, num_units, dropout=0.0, device=None):
@@ -36,7 +47,7 @@ def build_single_cell(cell_type, learning_rate, num_units, dropout=0.0, device=N
     return single_cell
 
 
-def build_cell_list(num_layers,cell_type, learning_rate, num_units, dropout, device = None):
+def build_cell_list(num_layers, cell_type, learning_rate, num_units, dropout, device=None):
     """
     Build cell list.
     :param num_layers:
@@ -58,4 +69,20 @@ def build_cell_list(num_layers,cell_type, learning_rate, num_units, dropout, dev
         return MultiRNNCell(cells=cell_list)
 
 
+def build_train_tuple(hparams):
+    """
+    Build train tuple <graph, model, iterator>
+    :param hparams:
+    :return:
+    """
+    graph = tf.Graph()
+    with graph.as_default():
+        vocab_table = build_vocab_table(hparams.vocab_file)
+        input_dataset = CsvDataset(filenames=hparams.train_file,
+                                   record_defaults=[[0.0], ['']])
+        iterator = iterator_utils.build_train_iterator(train_dataset=input_dataset,
+                                                       vocab_table=vocab_table,
+                                                       batch_size=hparams.batch_size)
+        model = Model(hparams, iterator)
 
+    return TrainTuple(graph=graph, model=model, iterator=iterator)
