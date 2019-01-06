@@ -3,7 +3,7 @@ import os
 import unittest
 import tensorflow as tf
 from config_utils import EMBEDDING_DIR
-from vocab_utils import _load_pretrained_embedding
+from embedding_utils import _load_pretrained_embedding
 
 
 class VocabUtilsTest(unittest.TestCase):
@@ -17,7 +17,7 @@ class VocabUtilsTest(unittest.TestCase):
         # TODO not finished yet.
         vocab_dir = os.path.join(tf.test.get_temp_dir(), 'vocab_dir')
         os.makedirs(vocab_dir)
-        vocab_file = os.path.join(vocab_dir, 'vocab.txt')
+        vocab_file = os.path.join(vocab_dir, 'embedding_gen_vocab.txt')
         vocab = ['a', 'b', 'c']
         with codecs.getwriter('utf-8')(tf.gfile.GFile(vocab_file, 'wb')) as w_file:
             for word in vocab:
