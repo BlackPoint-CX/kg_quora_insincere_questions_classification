@@ -23,7 +23,7 @@ def build_train_iterator(train_dataset, vocab_table, batch_size, buffer_size=Non
 
     train_dataset = train_dataset.map(
         map_func=lambda idx, question_text, label: (
-            tf.cast(idx, tf.string), tf.string_split(question_text).values, tf.cast(label, tf.int32)),
+            idx, tf.string_split([question_text]).values, label),
         num_parallel_calls=num_parallel_calls)
 
     train_dataset = train_dataset.map(
@@ -41,7 +41,7 @@ def build_train_iterator(train_dataset, vocab_table, batch_size, buffer_size=Non
                                                        ),
                                                        padding_values=(
                                                            '',
-                                                           '',
+                                                           0,
                                                            0,
                                                            0
                                                        ))

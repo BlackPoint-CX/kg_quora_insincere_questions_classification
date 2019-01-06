@@ -8,6 +8,8 @@ import model_helper
 import vocab_utils
 from collections import namedtuple
 
+from embedding_utils import build_or_load_embedding
+
 
 class TrainOutputTuple(
     namedtuple('TrainOutputTuple', ['train_summary', 'train_loss', 'global_step', 'batch_size', 'grad_norm'])):
@@ -25,15 +27,17 @@ class Model(object):
 
     def init(self):
         self.global_step = tf.Variable(initial_value=0, trainable=False)
+        self.build_encoder_cell()
+        self.build_embedding_encoder()
 
     def build_embedding_encoder(self):
         with tf.variable_scope('encoder_embedding') as scope:
-            self.encoder_embedding = vocab_utils.build_or_load_embedding(name='embedding_encoder',
-                                                                         vocab_file=self.hparams.vocab_file,
-                                                                         embedding_file=self.hparams.embedding_file,
-                                                                         vocab_size=self.hparams.vocab_size,
-                                                                         embedding_dim=self.hparams.embedding_dim
-                                                                         )
+            self.encoder_embedding = build_or_load_embedding(name='embedding_encoder',
+                                                             vocab_file=self.hparams.vocab_file,
+                                                             embedding_file=self.hparams.embedding_file,
+                                                             vocab_size=self.hparams.vocab_size,
+                                                             embedding_dim=self.hparams.embedding_dim
+                                                             )
 
     def build_encoder_cell(self):
         self.encoder_cell = model_helper.build_cell_list(num_layers=self.hparams.num_layers,
@@ -54,7 +58,8 @@ class Model(object):
                 encoder_outputs, encoder_state = dynamic_rnn(cell=self.encoder_cell,
                                                              inputs=sequence,
                                                              sequence_length=sequence_length,
-                                                             time_major=self.hparams.time_major)
+                                                             time_major=self.hparams.time_major,
+                                                             dtype=tf.float32)
 
             # elif self.hparams.direction_type == 'bi':
             # TODO Bi-directional

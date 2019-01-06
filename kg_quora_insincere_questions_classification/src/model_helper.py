@@ -1,6 +1,6 @@
 from collections import namedtuple
 import tensorflow as tf
-from tensorflow.contrib.data import CsvDataset
+
 from tensorflow.contrib.rnn import LayerNormBasicLSTMCell, DropoutWrapper, DeviceWrapper, MultiRNNCell
 import logging
 import os
@@ -31,7 +31,7 @@ def build_single_cell(cell_type, learning_rate, num_units, dropout=0.0, device=N
     """
     cell_type = cell_type.lower()
     if cell_type == 'lstm':
-        single_cell = tf.nn.rnn_cell.LSTMCell(learning_rate=learning_rate)
+        single_cell = tf.nn.rnn_cell.LSTMCell(num_units=num_units)
     elif cell_type == 'gru':
         single_cell = tf.nn.rnn_cell.GRUCell(num_units=num_units)
     elif cell_type == '':
@@ -79,8 +79,9 @@ def build_train_tuple(hparams):
     graph = tf.Graph()
     with graph.as_default():
         vocab_table = build_vocab_table(hparams.vocab_file)
-        input_dataset = CsvDataset(filenames=hparams.train_file,
-                                   record_defaults=[[0.0], ['']])
+        input_dataset = tf.data.experimental.CsvDataset(filenames=hparams.train_file,
+                                                        record_defaults=[tf.string, tf.string, tf.int32],
+                                                        header=True)
         iterator = iterator_utils.build_train_iterator(train_dataset=input_dataset,
                                                        vocab_table=vocab_table,
                                                        batch_size=hparams.batch_size)

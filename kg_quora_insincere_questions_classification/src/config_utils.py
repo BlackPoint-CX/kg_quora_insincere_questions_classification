@@ -24,5 +24,5 @@ EMBEDDING_DIR = os.path.join(DATA_DIR, 'embedding')
 PREDICTION_DIR = os.path.join(DATA_DIR, 'prediction')
 FEATURES_DIR = os.path.join(DATA_DIR, 'features')
 
-TRAIN_FILE_PATH = os.path.join(SOURCE_DIR, 'train.csv')
-TEST_FILE_PATH = os.path.join(SOURCE_DIR, 'test.csv')
+TRAIN_FILE_PATH = os.path.join(SOURCE_DIR, 'train_ori.csv')
+TEST_FILE_PATH = os.path.join(SOURCE_DIR, 'test_ori.csv')

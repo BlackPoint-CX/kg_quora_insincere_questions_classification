@@ -111,3 +111,5 @@ kg_quora_insincere_questions_classification/data/model
 .github
 *.zip
 *.csv
+kg_quora_insincere_questions_classification/data/
+tests/

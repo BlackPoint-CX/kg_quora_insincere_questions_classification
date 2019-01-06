@@ -1,6 +1,5 @@
-import datetime
 import os
-
+from commons_utils import time_now
 from config_utils import LOG_DIR, SUMMARY_DIR, MODEL_DIR
 from model_helper import build_train_tuple, build_or_load_model
 import tensorflow as tf
@@ -10,12 +9,8 @@ logging.basicConfig(filename=os.path.join(LOG_DIR, 'train.log'),
                     filemode='w+')
 
 
-def time_now():
-    return datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-
-
 def train(hparams):
-    train_tuple = build_train_tuple()
+    train_tuple = build_train_tuple(hparams=hparams)
 
     train_sess = tf.Session()
 
