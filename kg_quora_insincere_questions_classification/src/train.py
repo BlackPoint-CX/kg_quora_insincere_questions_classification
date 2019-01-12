@@ -10,18 +10,24 @@ logging.basicConfig(filename=os.path.join(LOG_DIR, 'train.log'),
 
 
 def train(hparams):
+    print('Building train_tuple')
     train_tuple = build_train_tuple(hparams=hparams)
 
-    train_sess = tf.Session()
+    print('Building train_sess and summary_writer')
+    train_sess = tf.Session(graph=train_tuple.graph)
 
     summary_writer = tf.summary.FileWriter(os.path.join(SUMMARY_DIR, 'train.summary'))
 
     with train_tuple.graph.as_default():
-        train_model, global_step = build_or_load_model(train_tuple.model, hparams.model_dir)
+        train_model, global_step = build_or_load_model(train_tuple.model, hparams.model_dir, train_sess)
+
+        train_sess.run(train_tuple.iterator.initializer)
 
     while global_step < hparams.num_train_steps:
+
         try:
             _, train_output_tuple = train_model.train(sess=train_sess)
+            print('global_step : {} train_loss : {}'.format(global_step, train_output_tuple.train_loss))
         except tf.errors.OutOfRangeError:
             now = time_now()
             logging.info('Finished One Epoch at %s' % now)

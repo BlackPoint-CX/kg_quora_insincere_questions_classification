@@ -6,9 +6,9 @@ import logging
 import os
 
 import iterator_utils
+from commons_utils import time_now
 from config_utils import LOG_DIR
 from model import Model
-from train import time_now
 from vocab_utils import build_vocab_table
 
 logging.basicConfig(filename=os.path.join(LOG_DIR, 'model_helper.log'),
@@ -80,7 +80,7 @@ def build_train_tuple(hparams):
     with graph.as_default():
         vocab_table = build_vocab_table(hparams.vocab_file)
         input_dataset = tf.data.experimental.CsvDataset(filenames=hparams.train_file,
-                                                        record_defaults=[tf.string, tf.string, tf.int32],
+                                                        record_defaults=[tf.string, tf.int32, tf.string],
                                                         header=True)
         iterator = iterator_utils.build_train_iterator(train_dataset=input_dataset,
                                                        vocab_table=vocab_table,

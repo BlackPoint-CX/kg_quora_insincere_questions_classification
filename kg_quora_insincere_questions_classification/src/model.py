@@ -29,6 +29,7 @@ class Model(object):
         self.global_step = tf.Variable(initial_value=0, trainable=False)
         self.build_encoder_cell()
         self.build_embedding_encoder()
+        self.build_dense_layer()
 
     def build_embedding_encoder(self):
         with tf.variable_scope('encoder_embedding') as scope:
@@ -56,7 +57,7 @@ class Model(object):
 
             if self.hparams.direction_type == 'uni':
                 encoder_outputs, encoder_state = dynamic_rnn(cell=self.encoder_cell,
-                                                             inputs=sequence,
+                                                             inputs=self.encoder_embedding_input,
                                                              sequence_length=sequence_length,
                                                              time_major=self.hparams.time_major,
                                                              dtype=tf.float32)
@@ -73,12 +74,12 @@ class Model(object):
         self.output_layer = tf.layers.Dense(units=self.hparams.num_labels)
 
     def build_logits(self):
-        logits = self.output_layer(inputs=self.encoder_outputs)
+        logits = self.output_layer(inputs=self.encoder_outputs[:, -1, :])
         predicts = tf.argmax(logits, 1)
         return logits, predicts
 
     def build_loss(self):
-        cross_ent = sparse_softmax_cross_entropy_with_logits(self.logits, self.iterator.label)
+        cross_ent = sparse_softmax_cross_entropy_with_logits(logits=self.logits, labels=self.iterator.label)
         loss = tf.reduce_mean(cross_ent)
         return loss
 
@@ -128,7 +129,7 @@ class Model(object):
                                                                 decay_rate=self.hparams.decay_rate,
                                                                 staircase=False)
 
-                gradients = tf.gradients(ys=self.iterator.label, xs=params)
+                gradients = tf.gradients(ys=self.train_loss, xs=params)
                 self.clipped_gradients, self.gradient_norm = tf.clip_by_global_norm(t_list=gradients,
                                                                                     clip_norm=self.hparams.clip_norm)
                 self.gradient_norm_summary = [tf.summary.scalar('grad_norm', self.gradient_norm),
@@ -152,6 +153,7 @@ class Model(object):
         train_output_tuple = TrainOutputTuple(train_summary=self.train_summary,
                                               train_loss=self.train_loss,
                                               global_step=self.global_step,
-                                              batch_size=self.hparams.batch_size,
+                                              batch_size=tf.size(self.iterator.sequence_length),
                                               grad_norm=self.gradient_norm)
+
         return sess.run([self.update, train_output_tuple])

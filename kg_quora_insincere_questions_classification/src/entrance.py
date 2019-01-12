@@ -19,8 +19,8 @@ def build_argparser(argument_parser):
                                  default=os.path.join(EMBEDDING_DIR, 'embedding.txt'))
     argument_parser.add_argument('--max_to_keep', type=int, default=5, help='max number of kept models.')
     argument_parser.add_argument('--vocab_file', type=str, default=os.path.join(SOURCE_DIR, 'vocab.txt'))
-    argument_parser.add_argument('--train_file', type=str, default=os.path.join(SOURCE_DIR, 'train_ori.csv'))
-    argument_parser.add_argument('--test_file', type=str, default=os.path.join(SOURCE_DIR, 'test_ori.csv'))
+    argument_parser.add_argument('--train_file', type=str, default=os.path.join(SOURCE_DIR, 'train.csv'))
+    argument_parser.add_argument('--test_file', type=str, default=os.path.join(SOURCE_DIR, 'test.csv'))
     argument_parser.add_argument('--num_layers', type=int, default=1, help='number of layers.')
     argument_parser.add_argument('--cell_type', type=str, default='lstm', help='type of rnn cell',
                                  choices=['lstm', 'gru'])
