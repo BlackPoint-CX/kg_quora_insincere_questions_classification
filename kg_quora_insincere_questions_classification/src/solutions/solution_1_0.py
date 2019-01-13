@@ -1,19 +1,26 @@
 """
 FROM : https://www.kaggle.com/shujian/mix-of-nn-models-based-on-meta-embeddings/notebook
 """
+import os
+import time
+import numpy as np  # linear algebra
+import pandas as pd  # input processing, CSV file I/O (e.g. pd.read_csv)
+from tqdm import tqdm
+import math
 from sklearn.model_selection import train_test_split
 from sklearn import metrics
 
 from keras.preprocessing.text import Tokenizer
 from keras.preprocessing.sequence import pad_sequences
-from keras.layers import CuDNNLSTM, CuDNNGRU
-from keras.layers import Bidirectional, GlobalMaxPooling1D, GlobalAveragePooling1D
+from keras.layers import Dense, Input, CuDNNLSTM, Embedding, Dropout, Activation, CuDNNGRU, Conv1D
+from keras.layers import Bidirectional, GlobalMaxPool1D, GlobalMaxPooling1D, GlobalAveragePooling1D
 from keras.layers import Input, Embedding, Dense, Conv2D, MaxPool2D, concatenate
-from keras.layers import Reshape, Flatten, Concatenate, Dropout
+from keras.layers import Reshape, Flatten, Concatenate, Dropout, SpatialDropout1D
+from keras.optimizers import Adam
 from keras.models import Model
 from keras import backend as K
 from keras.engine.topology import Layer
-from keras import initializers, regularizers, constraints
+from keras import initializers, regularizers, constraints, optimizers, layers
 
 import numpy as np  # linear algebra
 import pandas as pd  # input processing, CSV file I/O (e.g. pd.read_csv)
@@ -27,23 +34,25 @@ import os
 # For example, running this (by clicking run or pressing Shift+Enter) will list the files in the input directory
 
 
-# print(os.listdir("../input"))
-from config_utils import SOURCE_DIR, EMBEDDING_DIR
 
+# print(os.listdir("../input"))
+
+# Any results you write to the current directory are saved as output.
+
+# some config values
 embed_size = 300  # how big is each word vector
 max_features = 95000  # how many unique words to use (i.e num rows in embeddings vector)
 maxlen = 70  # max number of words in a question to use
 
 
-
 def load_and_prec():
-    train_df = pd.read_csv(os.path.join(SOURCE_DIR, "train_clean.csv"))
-    test_df = pd.read_csv(os.path.join(SOURCE_DIR, "test_clean.csv"))
+    train_df = pd.read_csv("../input/train_clean.csv")
+    test_df = pd.read_csv("../input/test_clean.csv")
     print("Train shape : ", train_df.shape)
     print("Test shape : ", test_df.shape)
 
     # split to train and val
-    train_df, val_df = train_test_split(train_df, test_size=0.1, random_state=2018)
+    train_df, val_df = train_test_split(train_df, test_size=0.08, random_state=2018)
 
     # fill up the missing values
     train_X = train_df["question_text"].fillna("_#_").values
@@ -80,7 +89,7 @@ def load_and_prec():
 
 
 def load_glove(word_index):
-    EMBEDDING_FILE = os.path.join(EMBEDDING_DIR,'glove.840B.300d.txt')
+    EMBEDDING_FILE = '../input/embeddings/glove.840B.300d/glove.840B.300d.txt'
 
     def get_coefs(word, *arr):
         return word, np.asarray(arr, dtype='float32')
@@ -315,8 +324,8 @@ def train_pred(model, epochs=2):
 
 train_X, val_X, test_X, train_y, val_y, word_index = load_and_prec()
 embedding_matrix_1 = load_glove(word_index)
-# embedding_matrix_2 = load_fasttext(word_index)
-# embedding_matrix_3 = load_para(word_index)
+embedding_matrix_2 = load_fasttext(word_index)
+embedding_matrix_3 = load_para(word_index)
 
 # Simple average: http://aclweb.org/anthology/N18-2031
 
@@ -335,19 +344,18 @@ embedding_matrix_1 = load_glove(word_index)
 #  as we combine more and more embeddings.”
 
 # embedding_matrix = np.mean([embedding_matrix_1, embedding_matrix_2, embedding_matrix_3], axis = 0)
-# embedding_matrix = np.mean([embedding_matrix_1, embedding_matrix_3], axis=0)
-embedding_matrix = np.mean([embedding_matrix_1], axis=0)
+embedding_matrix = np.mean([embedding_matrix_1, embedding_matrix_3], axis=0)
 np.shape(embedding_matrix)
 
 outputs = []
 pred_val_y, pred_test_y, best_score = train_pred(model_gru_srk_atten(embedding_matrix), epochs=2)
 outputs.append([pred_val_y, pred_test_y, best_score, 'gru atten srk'])
-#
-# pred_val_y, pred_test_y, best_score = train_pred(model_cnn(embedding_matrix), epochs=2)
-# outputs.append([pred_val_y, pred_test_y, best_score, '2d CNN'])
-#
-# pred_val_y, pred_test_y, best_score = train_pred(model_cnn(embedding_matrix_1), epochs=2)  # GloVe only
-# outputs.append([pred_val_y, pred_test_y, best_score, '2d CNN GloVe'])
+
+pred_val_y, pred_test_y, best_score = train_pred(model_cnn(embedding_matrix), epochs=2)
+outputs.append([pred_val_y, pred_test_y, best_score, '2d CNN'])
+
+pred_val_y, pred_test_y, best_score = train_pred(model_cnn(embedding_matrix_1), epochs=2)  # GloVe only
+outputs.append([pred_val_y, pred_test_y, best_score, '2d CNN GloVe'])
 
 pred_val_y, pred_test_y, best_score = train_pred(model_lstm_du(embedding_matrix), epochs=2)
 outputs.append([pred_val_y, pred_test_y, best_score, 'LSTM DU'])
@@ -357,9 +365,9 @@ outputs.append([pred_val_y, pred_test_y, best_score, '2 LSTM w/ attention'])
 
 pred_val_y, pred_test_y, best_score = train_pred(model_lstm_atten(embedding_matrix_1), epochs=3)  # Only GloVe
 outputs.append([pred_val_y, pred_test_y, best_score, '2 LSTM w/ attention GloVe'])
-#
-# pred_val_y, pred_test_y, best_score = train_pred(model_lstm_atten(embedding_matrix_3), epochs=3)  # Only Para
-# outputs.append([pred_val_y, pred_test_y, best_score, '2 LSTM w/ attention Para'])
+
+pred_val_y, pred_test_y, best_score = train_pred(model_lstm_atten(embedding_matrix_3), epochs=3)  # Only Para
+outputs.append([pred_val_y, pred_test_y, best_score, '2 LSTM w/ attention Para'])
 
 outputs.sort(key=lambda x: x[2])  # Sort the output by val f1 score
 weights = [i for i in range(1, len(outputs) + 1)]
@@ -387,12 +395,7 @@ print("Best threshold: ", best_thresh)
 pred_test_y = np.mean([outputs[i][1] for i in range(len(outputs))], axis=0)
 
 pred_test_y = (pred_test_y > best_thresh).astype(int)
-test_df = pd.read_csv(os.path.join(SOURCE_DIR,"test_clean.csv"), usecols=["qid"])
+test_df = pd.read_csv("../input/test_clean.csv", usecols=["qid"])
 out_df = pd.DataFrame({"qid": test_df["qid"].values})
 out_df['prediction'] = pred_test_y
 out_df.to_csv("submission.csv", index=False)
-
-import pandas as pd
-test_df = pd.read_csv("/home/bp/PycharmProjects/kg_quora_insincere_questions_classification/kg_quora_insincere_questions_classification/src/solutions/submission.csv", usecols=["prediction"])
-list(test_df['prediction'])
-type(test_df)

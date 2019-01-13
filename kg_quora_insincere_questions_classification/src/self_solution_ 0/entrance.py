@@ -16,11 +16,11 @@ def build_argparser(argument_parser):
     argument_parser.add_argument('--embedding_dim', type=int, default=300, help='Di')
     argument_parser.add_argument('--embedding_trainable', type='bool', nargs='?', const=True, help='')
     argument_parser.add_argument('--embedding_file', type=str,
-                                 default=os.path.join(EMBEDDING_DIR, 'embedding.txt'))
+                                 default=os.path.join(EMBEDDING_DIR, 'embeddings.txt'))
     argument_parser.add_argument('--max_to_keep', type=int, default=5, help='max number of kept models.')
     argument_parser.add_argument('--vocab_file', type=str, default=os.path.join(SOURCE_DIR, 'vocab.txt'))
-    argument_parser.add_argument('--train_file', type=str, default=os.path.join(SOURCE_DIR, 'train.csv'))
-    argument_parser.add_argument('--test_file', type=str, default=os.path.join(SOURCE_DIR, 'test.csv'))
+    argument_parser.add_argument('--train_file', type=str, default=os.path.join(SOURCE_DIR, 'train_clean.csv'))
+    argument_parser.add_argument('--test_file', type=str, default=os.path.join(SOURCE_DIR, 'test_clean.csv'))
     argument_parser.add_argument('--num_layers', type=int, default=1, help='number of layers.')
     argument_parser.add_argument('--cell_type', type=str, default='lstm', help='type of rnn cell',
                                  choices=['lstm', 'gru'])

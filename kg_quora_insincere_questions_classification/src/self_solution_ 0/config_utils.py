@@ -13,16 +13,16 @@ else:
 PROJECT_DIR = os.path.join(REPO_DIR,
                            'kg_quora_insincere_questions_classification/kg_quora_insincere_questions_classification')
 
-DATA_DIR = os.path.join(PROJECT_DIR, 'data')
+DATA_DIR = os.path.join(PROJECT_DIR, 'input')
 SRC_DIR = os.path.join(PROJECT_DIR, 'src')
 LOG_DIR = os.path.join(PROJECT_DIR, 'log')
 MODEL_DIR = os.path.join(PROJECT_DIR, 'model')
 SUMMARY_DIR = os.path.join(PROJECT_DIR, 'summary')
 
 SOURCE_DIR = os.path.join(DATA_DIR, 'source')
-EMBEDDING_DIR = os.path.join(DATA_DIR, 'embedding')
+EMBEDDING_DIR = os.path.join(DATA_DIR, 'embeddings')
 PREDICTION_DIR = os.path.join(DATA_DIR, 'prediction')
 FEATURES_DIR = os.path.join(DATA_DIR, 'features')
 
-TRAIN_FILE_PATH = os.path.join(SOURCE_DIR, 'train_ori.csv')
-TEST_FILE_PATH = os.path.join(SOURCE_DIR, 'test_ori.csv')
+TRAIN_FILE_PATH = os.path.join(SOURCE_DIR, 'train.csv')
+TEST_FILE_PATH = os.path.join(SOURCE_DIR, 'test.csv')

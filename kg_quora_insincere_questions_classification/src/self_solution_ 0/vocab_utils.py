@@ -62,7 +62,7 @@ def preprocessing_sentence(sequence):
 
 
 def preprocessing_csv():
-    for file in ['train_ori.csv', 'test_ori.csv']:
+    for file in ['train.csv', 'test.csv']:
         df = pd.read_csv(os.path.join(SOURCE_DIR, file))
         df['question_text_new'] = df.apply(lambda row: ' '.join(preprocessing_sentence(row['question_text'])), axis=1)
 
@@ -71,7 +71,7 @@ def preprocessing_csv():
         df.to_csv(os.path.join(SOURCE_DIR, 'new_' + file), index=False)
 
 
-# TODO : filter out those valid word and relate embedding from whole embeddings.
+# TODO : filter out those valid word and relate embeddings from whole embeddings.
 def build_word_count_dict(files):
     word_count_dict = defaultdict(int)
     for file in files:
@@ -87,7 +87,7 @@ def build_word_count_dict(files):
 
 
 def build_vocab_file_from_csv():
-    files = [os.path.join(SOURCE_DIR, file_name) for file_name in ['train_ori.csv', 'test_ori.csv']]
+    files = [os.path.join(SOURCE_DIR, file_name) for file_name in ['train.csv', 'test.csv']]
     word_count_dict = build_word_count_dict(files)  # 220822
 
     word_list = []  # 2195896

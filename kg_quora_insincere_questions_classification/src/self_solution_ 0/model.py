@@ -5,7 +5,6 @@ from tensorflow.python.ops.rnn import dynamic_rnn
 from tensorflow.python.training.gradient_descent import GradientDescentOptimizer
 
 import model_helper
-import vocab_utils
 from collections import namedtuple
 
 from embedding_utils import build_or_load_embedding

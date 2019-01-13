@@ -1,15 +1,9 @@
 import os
-import numpy as np
 import pandas as pd
-import sklearn
-from scipy.stats import chi2
-from sklearn.externals import joblib
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import train_test_split
-from sklearn.pipeline import Pipeline, make_pipeline
 import re
 from config_utils import TEST_FILE_PATH, TRAIN_FILE_PATH, PREDICTION_DIR, FEATURES_DIR
-from sklearn.feature_selection import SelectKBest
 from sklearn.svm import SVC
 from sklearn.metrics import precision_score, recall_score
 from nltk.stem import WordNetLemmatizer

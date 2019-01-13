@@ -14,7 +14,7 @@ logging.basicConfig(filename=os.path.join(LOG_DIR, 'embedding_utils.log'),
 
 def _get_embedding_device(vocab_size):
     """
-    Choose proper device for vocab embedding.
+    Choose proper device for vocab embeddings.
     :param vocab_size:
     :return:
     """
@@ -27,13 +27,13 @@ def _get_embedding_device(vocab_size):
 
 def _load_pretrained_embedding(embedding_file):
     """
-    Loading embedding from Glove / word2vec formatted text file.
+    Loading embeddings from Glove / word2vec formatted text file.
     For word2vec format, the first line will be : <num_words> <embedding_dim>
     :param embedding_file:
     :return:
         num_words : number of words.
-        embedding_dim : dimension of embedding
-        word_embedding_dict : dict(word : embedding)
+        embedding_dim : dimension of embeddings
+        word_embedding_dict : dict(word : embeddings)
 
     """
     word_embedding_dict = dict()
@@ -51,7 +51,7 @@ def _load_pretrained_embedding(embedding_file):
             embedding = list(map(float, eles[1:]))
             if embedding_dim:
                 if len(embedding) != embedding_dim:
-                    logging.warning('Ignoring %s since embedding size is inconsistent.' % word)
+                    logging.warning('Ignoring %s since embeddings size is inconsistent.' % word)
             else:
                 embedding_dim = len(embedding)
             word_embedding_dict[word] = embedding
@@ -61,7 +61,7 @@ def _load_pretrained_embedding(embedding_file):
 
 def load_embedding(vocab_file, embedding_file, num_trainable_words=0):
     """
-    According vocabulary to load relate embedding;
+    According vocabulary to load relate embeddings;
     Assign initial value for trainable words.
     :param vocab_file:
     :param embedding_file:
@@ -102,7 +102,7 @@ def get_embedding_from_ori():
 
     num_word, word_list = load_vocab(os.path.join(SOURCE_DIR, 'vocab.txt'))
 
-    with open(os.path.join(EMBEDDING_DIR, 'embedding.txt'), 'w+') as w_file:
+    with open(os.path.join(EMBEDDING_DIR, 'embeddings.txt'), 'w+') as w_file:
         for word in word_list:
             if word in word_embedding_dict:
                 new_word_embedding_dict[word] = word_embedding_dict[word]
