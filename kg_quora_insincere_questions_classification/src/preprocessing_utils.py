@@ -55,7 +55,7 @@ def clean_text(x):
     for punct in "/-'":
         x = x.replace(punct, ' ')
     for punct in '&':
-        x = x.replace(punct, f' {punct} ')
+        x = x.replace(punct, ' {punct} ')
     for punct in '?!.,"#$%\'()*+-/:;<=>@[\\]^_`{|}~' + '“”’':
         x = x.replace(punct, '')
     for punct in puncts:

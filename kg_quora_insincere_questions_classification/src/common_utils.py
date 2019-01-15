@@ -4,8 +4,10 @@ import sys
 
 if platform.system() == 'Darwin':  # OS
     PROJECT_DIR = '/Users/alfredchen/Develop/PyRepos/kg_quora_insincere_questions_classification/kg_quora_insincere_questions_classification'
+elif platform.system() == 'Linux':
+    PROJECT_DIR = '/home/bp/PycharmProjects/kg_quora_insincere_questions_classification/kg_quora_insincere_questions_classification'
 else:
-    PROJECT_DIR = ''
+    raise ValueError('Wrong Project Directory')
 
 
 INPUT_DIR = os.path.join(PROJECT_DIR,'input')

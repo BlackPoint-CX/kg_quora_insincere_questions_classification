@@ -1,6 +1,8 @@
 import gc
-import sklearn
+import os
 
+import sklearn
+import tensorflow as tf
 import nltk as nltk
 from keras import Input, Model
 from keras.engine import Layer
@@ -15,10 +17,14 @@ import pandas as pd
 from sklearn.model_selection import StratifiedShuffleSplit, GridSearchCV
 
 from attention_layer import Attention
-from common_utils import TRAIN_FILE_PATH, TEST_FILE_PATH
+from common_utils import TRAIN_FILE_PATH, TEST_FILE_PATH, PROJECT_DIR
 from embedding_utils import new_load_glove
 from preprocessing_utils import clean_text, clean_numbers, replace_typical_misspell
 from vocab_utils import load_vocab
+os.environ["CUDA_VISIBLE_DEVICES"]="1" # 使用编号为1，2号的GPU
+config = tf.ConfigProto()
+config.gpu_options.per_process_gpu_memory_fraction = 0.9 # 每个GPU现存上届控制在60%以内
+session = tf.Session(config=config)
 
 MAX_LEN = 100
 MAX_FEATURES = 2 * 10 ** 5
@@ -116,8 +122,8 @@ if __name__ == '__main__':
     test_df['question_text'] = test_df['question_text'].apply(lambda x: clean_numbers(x))
 
     print('Process Step 1')
-    embedding_file_path = '/Users/alfredchen/Develop/PyRepos/kg_quora_insincere_questions_classification/kg_quora_insincere_questions_classification/input/embedding/glove.840B.300d.txt'
-    vocab_file_path = '/Users/alfredchen/Develop/PyRepos/kg_quora_insincere_questions_classification/kg_quora_insincere_questions_classification/input/embedding/glove.vocab.txt'
+    embedding_file_path = os.path.join(PROJECT_DIR,'input/embedding/glove.840B.300d.txt')
+    vocab_file_path = os.path.join(PROJECT_DIR,'input/embedding/glove.vocab.txt')
     word_idx_table, idx_word_table = load_vocab(vocab_file_path)
     embedding_matrix = new_load_glove(word_idx_table, embedding_file_path)
 
