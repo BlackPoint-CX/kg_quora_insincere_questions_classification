@@ -28,7 +28,9 @@ import os
 
 
 # print(os.listdir("../input"))
-from config_utils import SOURCE_DIR, EMBEDDING_DIR
+
+from attention_layer import Attention
+from embedding_utils import load_glove
 
 embed_size = 300  # how big is each word vector
 max_features = 95000  # how many unique words to use (i.e num rows in embeddings vector)
@@ -79,74 +81,7 @@ def load_and_prec():
     return train_X, val_X, test_X, train_y, val_y, tokenizer.word_index
 
 
-def load_glove(word_index):
-    EMBEDDING_FILE = os.path.join(EMBEDDING_DIR,'glove.840B.300d.txt')
 
-    def get_coefs(word, *arr):
-        return word, np.asarray(arr, dtype='float32')
-
-    embeddings_index = dict(get_coefs(*o.split(" ")) for o in open(EMBEDDING_FILE))
-
-    all_embs = np.stack(embeddings_index.values())
-    emb_mean, emb_std = all_embs.mean(), all_embs.std()
-    embed_size = all_embs.shape[1]
-
-    # word_index = tokenizer.word_index
-    nb_words = min(max_features, len(word_index))
-    embedding_matrix = np.random.normal(emb_mean, emb_std, (nb_words, embed_size))
-    for word, i in word_index.items():
-        if i >= max_features: continue
-        embedding_vector = embeddings_index.get(word)
-        if embedding_vector is not None: embedding_matrix[i] = embedding_vector
-
-    return embedding_matrix
-
-
-def load_fasttext(word_index):
-    EMBEDDING_FILE = '../input/embeddings/wiki-news-300d-1M/wiki-news-300d-1M.vec'
-
-    def get_coefs(word, *arr):
-        return word, np.asarray(arr, dtype='float32')
-
-    embeddings_index = dict(get_coefs(*o.split(" ")) for o in open(EMBEDDING_FILE) if len(o) > 100)
-
-    all_embs = np.stack(embeddings_index.values())
-    emb_mean, emb_std = all_embs.mean(), all_embs.std()
-    embed_size = all_embs.shape[1]
-
-    # word_index = tokenizer.word_index
-    nb_words = min(max_features, len(word_index))
-    embedding_matrix = np.random.normal(emb_mean, emb_std, (nb_words, embed_size))
-    for word, i in word_index.items():
-        if i >= max_features: continue
-        embedding_vector = embeddings_index.get(word)
-        if embedding_vector is not None: embedding_matrix[i] = embedding_vector
-
-    return embedding_matrix
-
-
-def load_para(word_index):
-    EMBEDDING_FILE = '../input/embeddings/paragram_300_sl999/paragram_300_sl999.txt'
-
-    def get_coefs(word, *arr):
-        return word, np.asarray(arr, dtype='float32')
-
-    embeddings_index = dict(
-        get_coefs(*o.split(" ")) for o in open(EMBEDDING_FILE, encoding="utf8", errors='ignore') if len(o) > 100)
-
-    all_embs = np.stack(embeddings_index.values())
-    emb_mean, emb_std = all_embs.mean(), all_embs.std()
-    embed_size = all_embs.shape[1]
-
-    # word_index = tokenizer.word_index
-    nb_words = min(max_features, len(word_index))
-    embedding_matrix = np.random.normal(emb_mean, emb_std, (nb_words, embed_size))
-    for word, i in word_index.items():
-        if i >= max_features: continue
-        embedding_vector = embeddings_index.get(word)
-        if embedding_vector is not None: embedding_matrix[i] = embedding_vector
-
-    return embedding_matrix
 
 
 # https://www.kaggle.com/yekenot/2dcnn-textclassifier
@@ -175,77 +110,6 @@ def model_cnn(embedding_matrix):
 
     return model
 
-
-# https://www.kaggle.com/suicaokhoailang/lstm-attention-baseline-0-652-lb
-
-class Attention(Layer):
-    def __init__(self, step_dim,
-                 W_regularizer=None, b_regularizer=None,
-                 W_constraint=None, b_constraint=None,
-                 bias=True, **kwargs):
-        self.supports_masking = True
-        self.init = initializers.get('glorot_uniform')
-
-        self.W_regularizer = regularizers.get(W_regularizer)
-        self.b_regularizer = regularizers.get(b_regularizer)
-
-        self.W_constraint = constraints.get(W_constraint)
-        self.b_constraint = constraints.get(b_constraint)
-
-        self.bias = bias
-        self.step_dim = step_dim
-        self.features_dim = 0
-        super(Attention, self).__init__(**kwargs)
-
-    def build(self, input_shape):
-        assert len(input_shape) == 3
-
-        self.W = self.add_weight((input_shape[-1],),
-                                 initializer=self.init,
-                                 name='{}_W'.format(self.name),
-                                 regularizer=self.W_regularizer,
-                                 constraint=self.W_constraint)
-        self.features_dim = input_shape[-1]
-
-        if self.bias:
-            self.b = self.add_weight((input_shape[1],),
-                                     initializer='zero',
-                                     name='{}_b'.format(self.name),
-                                     regularizer=self.b_regularizer,
-                                     constraint=self.b_constraint)
-        else:
-            self.b = None
-
-        self.built = True
-
-    def compute_mask(self, input, input_mask=None):
-        return None
-
-    def call(self, x, mask=None):
-        features_dim = self.features_dim
-        step_dim = self.step_dim
-
-        eij = K.reshape(K.dot(K.reshape(x, (-1, features_dim)),
-                              K.reshape(self.W, (features_dim, 1))), (-1, step_dim))
-
-        if self.bias:
-            eij += self.b
-
-        eij = K.tanh(eij)
-
-        a = K.exp(eij)
-
-        if mask is not None:
-            a *= K.cast(mask, K.floatx())
-
-        a /= K.cast(K.sum(a, axis=1, keepdims=True) + K.epsilon(), K.floatx())
-
-        a = K.expand_dims(a)
-        weighted_input = x * a
-        return K.sum(weighted_input, axis=1)
-
-    def compute_output_shape(self, input_shape):
-        return input_shape[0], self.features_dim
 
 
 def model_lstm_atten(embedding_matrix):
@@ -393,6 +257,6 @@ out_df['prediction'] = pred_test_y
 out_df.to_csv("submission.csv", index=False)
 
 import pandas as pd
-test_df = pd.read_csv("/home/bp/PycharmProjects/kg_quora_insincere_questions_classification/kg_quora_insincere_questions_classification/src/solutions/submission.csv", usecols=["prediction"])
+test_df = pd.read_csv("/home/bp/PycharmProjects/kg_quora_insincere_questions_classification/kg_quora_insincere_questions_classification/src/public_solutions/submission.csv", usecols=["prediction"])
 list(test_df['prediction'])
 type(test_df)
