@@ -314,10 +314,10 @@ test_df = test_df.apply(lambda row: clean_question_text(row), axis=1)
 train_df['question_text'] = train_df['question_text'].apply(lambda x: replace_typical_misspell(x))
 test_df['question_text'] = test_df['question_text'].apply(lambda x: replace_typical_misspell(x))
 
-embedding_file_path = '../input/embedding/glove.840B.300d.txt'
-vocab_file_path = '../input/embedding/glove.vocab.txt'
-# embedding_file_path = os.path.join(INPUT_DIR, 'embedding/glove.840B.300d.txt')
-# vocab_file_path = os.path.join(INPUT_DIR, 'embedding/glove.vocab.txt')
+embedding_file_path = '../input/embeddings/glove.840B.300d.txt'
+vocab_file_path = '../input/embeddings/glove.vocab.txt'
+# embedding_file_path = os.path.join(INPUT_DIR, 'embeddings/glove.840B.300d.txt')
+# vocab_file_path = os.path.join(INPUT_DIR, 'embeddings/glove.vocab.txt')
 
 word_count = build_word_count(train_df, test_df)
 build_vocab(word_count, embedding_file_path, vocab_file_path)

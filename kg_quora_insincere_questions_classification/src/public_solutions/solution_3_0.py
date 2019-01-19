@@ -53,7 +53,7 @@ test["question_text"] = test["question_text"].apply(lambda x: clean_text(x))
 
 ## some config values
 embed_size = 300  # how big is each word vector
-max_features = None  # how many unique words to use (i.e num rows in embedding vector)
+max_features = None  # how many unique words to use (i.e num rows in embeddings vector)
 maxlen = 72  # max number of words in a question to use #99.99%
 
 ## fill up the missing values

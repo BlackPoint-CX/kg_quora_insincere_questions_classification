@@ -62,8 +62,8 @@ if __name__ == '__main__':
     test_df['question_text'] = test_df['question_text'].apply(lambda x: clean_numbers(x))
 
     word_count = build_word_count(train_df, test_df)
-    embedding_file_path = '/Users/alfredchen/Develop/PyRepos/kg_quora_insincere_questions_classification/kg_quora_insincere_questions_classification/input/embedding/glove.840B.300d.txt'
-    vocab_file_path = '/Users/alfredchen/Develop/PyRepos/kg_quora_insincere_questions_classification/kg_quora_insincere_questions_classification/input/embedding/glove.vocab.txt'
+    embedding_file_path = '/Users/alfredchen/Develop/PyRepos/kg_quora_insincere_questions_classification/kg_quora_insincere_questions_classification/input/embeddings/glove.840B.300d.txt'
+    vocab_file_path = '/Users/alfredchen/Develop/PyRepos/kg_quora_insincere_questions_classification/kg_quora_insincere_questions_classification/input/embeddings/glove.vocab.txt'
     build_vocab(word_count, embedding_file_path, vocab_file_path)
 
     word_idx_table, idx_word_table = load_vocab(vocab_file_path)
