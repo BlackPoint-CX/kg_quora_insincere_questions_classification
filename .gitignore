@@ -108,5 +108,6 @@ ENV/
 .github
 *.zip
 *.csv
+*.txt
 tests/*
 kg_quora_insincere_questions_classification/src/input/*

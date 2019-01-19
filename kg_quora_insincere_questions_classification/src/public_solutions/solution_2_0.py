@@ -165,7 +165,7 @@ outputs.append([pred_val_y, pred_test_y, best_score, 'model_lstm_atten only Glov
 pred_val_y, pred_test_y, best_score = train_pred(model_lstm_atten(embedding_matrix_3), epochs=3)
 outputs.append([pred_val_y, pred_test_y, best_score, 'model_lstm_atten_embedding only Para'])
 
-pred_val_y, pred_test_y, best_score = train_pred(model_lstm_atten(embedding_matrix), epochs=4)
+pred_val_y, pred_test_y, best_score = train_pred(model_lstm_atten(embedding_matrix), epochs=3)
 outputs.append([pred_val_y, pred_test_y, best_score, 'model_lstm_atten All embed'])
 
 outputs.sort(key=lambda x: x[2])

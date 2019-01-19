@@ -1,1 +1,0 @@
-/Users/alfredchen/Develop/Embeddings/GloVe/glove.840B.300d.txt
