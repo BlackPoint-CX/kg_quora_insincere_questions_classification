@@ -23,7 +23,7 @@ from keras import initializers, regularizers, constraints, optimizers, layers
 from keras.layers import concatenate
 
 from attention_layer import Attention
-from embedding_utils import load_glove, load_para
+from embeddinga_utils import load_glove, load_para, load_fasttext
 from preprocessing_utils import mispell_dict, puncts, clean_text, clean_numbers, replace_typical_misspell
 
 EMBED_SIZE = 300
@@ -110,7 +110,7 @@ def f1(y_true, y_pred):
 
 def model_lstm_atten(embedding_matrix):
     inp = Input(shape=(MAXLEN,))
-    x = Embedding(MAX_FEATURES, EMBED_SIZE, weights=[embedding_matrix], trainable=False)(inp)
+    x = Embedding(MAX_FEATURES, EMBED_SIZE , weights=[embedding_matrix], trainable=False)(inp)
     x = SpatialDropout1D(0.1)(x)
     x = Bidirectional(CuDNNLSTM(40, return_sequences=True))(x)
     y = Bidirectional(CuDNNGRU(40, return_sequences=True))(x)
@@ -122,6 +122,27 @@ def model_lstm_atten(embedding_matrix):
 
     conc = concatenate([atten_1, atten_2, avg_pool, max_pool])
     conc = Dense(16, activation='relu')(conc)
+    conc = Dropout(0.1)(conc)
+    outp = Dense(1, activation='sigmoid')(conc)
+
+    model = Model(inputs=inp, outputs=outp)
+    model.compile(loss='binary_crossentropy', optimizer='adam', metrics=[f1])
+
+    return model
+
+def model_lstm_atten_900(embedding_matrix):
+    inp = Input(shape=(MAXLEN,))
+    x = Embedding(MAX_FEATURES, EMBED_SIZE * 3, weights=[embedding_matrix], trainable=False)(inp)
+    x = Bidirectional(CuDNNLSTM(512, return_sequences=True))(x)
+    y = Bidirectional(CuDNNGRU(256, return_sequences=True))(x)
+
+    atten_1 = Attention(MAXLEN)(x)
+    atten_2 = Attention(MAXLEN)(y)
+    avg_pool = GlobalAveragePooling1D()(y)
+    max_pool = GlobalMaxPooling1D()(y)
+
+    conc = concatenate([atten_1, atten_2, avg_pool, max_pool])
+    conc = Dense(128, activation='relu')(conc)
     conc = Dropout(0.1)(conc)
     outp = Dense(1, activation='sigmoid')(conc)
 
@@ -154,16 +175,21 @@ def train_pred(model, epochs=2):
 
 train_X, val_X, test_X, train_y, val_y, word_index = load_data()
 embedding_matrix_1 = load_glove(word_index)
-# embedding_matrix_2 = load_fasttext(word_index)
+embedding_matrix_2 = load_fasttext(word_index)
 embedding_matrix_3 = load_para(word_index)
 
-embedding_matrix = np.mean([embedding_matrix_1, embedding_matrix_3], axis=0)
+embedding_matrix = np.mean([embedding_matrix_1, embedding_matrix_2, embedding_matrix_3], axis=0)
+# embedding_matrix = np.concatenate((embedding_matrix_1, embedding_matrix_2, embedding_matrix_3), axis=1)
+# embedding_matrix = embedding_matrix_1
 outputs = []
 pred_val_y, pred_test_y, best_score = train_pred(model_lstm_atten(embedding_matrix_1), epochs=3)
 outputs.append([pred_val_y, pred_test_y, best_score, 'model_lstm_atten only Glove'])
 
-pred_val_y, pred_test_y, best_score = train_pred(model_lstm_atten(embedding_matrix_3), epochs=3)
-outputs.append([pred_val_y, pred_test_y, best_score, 'model_lstm_atten_embedding only Para'])
+# pred_val_y, pred_test_y, best_score = train_pred(model_lstm_atten(embedding_matrix_3), epochs=3)
+# outputs.append([pred_val_y, pred_test_y, best_score, 'model_lstm_atten_embedding only Para'])
+
+# pred_val_y, pred_test_y, best_score = train_pred(model_lstm_atten_900(embedding_matrix), epochs=5)
+# outputs.append([pred_val_y, pred_test_y, best_score, 'model_lstm_atten All embed'])
 
 pred_val_y, pred_test_y, best_score = train_pred(model_lstm_atten(embedding_matrix), epochs=3)
 outputs.append([pred_val_y, pred_test_y, best_score, 'model_lstm_atten All embed'])
@@ -191,3 +217,5 @@ sub = pd.read_csv('../input/sample_submission.csv')
 out_df = pd.DataFrame({"qid": sub["qid"].values})
 out_df['prediction'] = pred_test_y
 out_df.to_csv("submission.csv", index=False)
+
+pd.read_csv('/home/bp/PycharmProjects/kg_quora_insincere_questions_classification/kg_quora_insincere_questions_classification/src/public_solutions/submission.csv')['prediction'].apply(lambda x : 1 if x > 0.5 else 0 ).tolist()

@@ -178,4 +178,4 @@ if __name__ == '__main__':
     sub['prediction'] = y_test_pred
     sub.to_csv("submission.csv", index=False)
 
-    # pd.read_csv('~/PycharmProjects/kg_quora_insincere_questions_classification/kg_quora_insincere_questions_classification/src/own_solutions/self_solution_1/submission.csv')['prediction'].apply(lambda x : 1 if x > 0.5 else 0 ).tolist()
+    pd.read_csv('~/PycharmProjects/kg_quora_insincere_questions_classification/kg_quora_insincere_questions_classification/src/own_solutions/self_solution_1/submission.csv')['prediction'].apply(lambda x : 1 if x > 0.5 else 0 ).tolist()

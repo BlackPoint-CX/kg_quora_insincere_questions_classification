@@ -1,9 +1,9 @@
 import os
-from collections import defaultdict, Counter
+from collections import defaultdict
 
 import pandas as pd
 
-from common_utils import TRAIN_FILE_PATH, TEST_FILE_PATH, INPUT_DIR
+from public.common_utils import TRAIN_FILE_PATH, TEST_FILE_PATH, INPUT_DIR
 
 if __name__ == '__main__':
     train_df = pd.read_csv(TRAIN_FILE_PATH)
@@ -83,7 +83,6 @@ if __name__ == '__main__':
     # alpha_word_count = {t[0]: t[1] for t in sorted(alpha_word_count.items(), key=lambda t: t[1], reverse=True)}
     # no_alpha_word_count = {t[0]: t[1] for t in sorted(no_alpha_word_count.items(), key=lambda t: t[1], reverse=True)}
 
-    import re
     from functools import partial
 
     question_mark_start = set()  # ?swing

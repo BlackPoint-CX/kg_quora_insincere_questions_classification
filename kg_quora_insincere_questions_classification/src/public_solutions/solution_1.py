@@ -30,7 +30,7 @@ import os
 # print(os.listdir("../input"))
 
 from attention_layer import Attention
-from embedding_utils import load_glove
+from embeddinga_utils import load_glove
 
 embed_size = 300  # how big is each word vector
 max_features = 95000  # how many unique words to use (i.e num rows in embeddings vector)

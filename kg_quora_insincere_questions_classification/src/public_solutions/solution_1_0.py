@@ -41,7 +41,7 @@ import os
 
 # some config values
 from attention_layer import Attention
-from embedding_utils import load_glove, load_fasttext, load_para
+from embeddinga_utils import load_glove, load_fasttext, load_para
 
 embed_size = 300  # how big is each word vector
 max_features = 95000  # how many unique words to use (i.e num rows in embeddings vector)
