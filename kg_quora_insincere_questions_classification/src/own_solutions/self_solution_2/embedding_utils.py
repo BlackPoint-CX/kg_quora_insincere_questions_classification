@@ -5,7 +5,8 @@ from keras.callbacks import *
 tqdm.pandas()
 
 EMBEDDINGS_METHOD_LIST =  [1, 2, 3, 5, 6, 7, 9, 15, 16, 17, 19]
-# EMBEDDINGS_METHOD_LIST = [9]
+# EMBEDDINGS_METHOD_LIST =  [19]
+# EMBEDDINGS_METHOD_LIST = [19]
 
 
 def get_coefs(word, *arr):

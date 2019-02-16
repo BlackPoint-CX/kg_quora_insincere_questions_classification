@@ -1,3 +1,4 @@
+import gc
 import os
 
 import pandas as pd
@@ -11,7 +12,7 @@ import numpy as np
 
 from config_utils import TRAIN_FILE_PATH, TEST_FILE_PATH, LOG_DIR
 from embedding_utils import global_all_embeddings_init, EMBEDDINGS_METHOD_LIST, load_embeddings_factory
-from model_utils import bmdl_0, bmdl_1
+from model_utils import bmdl_0, bmdl_1, bmdl_2
 from tuple_utils import GridSearchResultTuple
 
 
@@ -90,9 +91,9 @@ if __name__ == '__main__':
     seed = 2019
     np.random.seed(seed=seed)
 
-    max_features_range = [100000,200000]
+    max_features_range = [200000]
     max_len_range = [90]
-    train_tuple_list = [bmdl_0]
+    train_tuple_list = [bmdl_1]
     # gs_result_list = []
     history_list = []
     history_list_2 = []
@@ -118,11 +119,16 @@ if __name__ == '__main__':
                         # gs_result.append('{} <- {}'.format(gs_result.best_score, gs_result.best_params))
                         model = train_tuple.build_fn(max_len, max_features, embedding_matrix)
 
-                        history = model.fit(x=train_X, y=train_y, batch_size=128, epochs=5, verbose=2)
+                        history = model.fit(x=train_X, y=train_y, batch_size=128, epochs=10, verbose=2,
+                                            validation_data=(val_X, val_y))
 
                         # history_list.append(history)
                         print(history.history)
-                        w_file.write('%s\n' % history.history)
+                        msg = '%s %s %s %s %s ' % (max_features, max_len, embedding_method, train_tuple.index_name, history.history)
+                        w_file.write('%s\n' % msg)
+
+                        del model
+                        gc.collect()
 
     # with open(os.path.join(LOG_DIR, 'gs_result_log.txt'), 'w+') as w_file:
     #     for result in gs_result_list:

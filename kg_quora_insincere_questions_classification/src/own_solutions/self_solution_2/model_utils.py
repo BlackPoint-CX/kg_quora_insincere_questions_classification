@@ -1,6 +1,6 @@
 from keras import Input, Model
 from keras.layers import Embedding, Bidirectional, CuDNNLSTM, CuDNNGRU, GlobalAveragePooling1D, GlobalMaxPooling1D, \
-    concatenate, Dense, Dropout
+    concatenate, Dense, Dropout, SpatialDropout1D
 from sklearn.metrics import f1_score
 
 from keras.engine import Layer
@@ -36,8 +36,8 @@ def bmdl_0(max_len, max_features, embedding_matrix):
         inp = Input(shape=(max_len,))
         x = Embedding(input_dim=max_features, output_dim=embedding_dim, weights=[embedding_matrix], trainable=False)(
             inp)
-        x = Bidirectional(CuDNNLSTM(5, return_sequences=True))(x)
-        y = Bidirectional(CuDNNGRU(2, return_sequences=True))(x)
+        x = Bidirectional(CuDNNLSTM(512, return_sequences=True))(x)
+        y = Bidirectional(CuDNNGRU(256, return_sequences=True))(x)
         atten_1 = Attention(max_len)(x)
         atten_2 = Attention(max_len)(y)
         avg_pool = GlobalAveragePooling1D()(y)
@@ -50,7 +50,6 @@ def bmdl_0(max_len, max_features, embedding_matrix):
 
         model = Model(inputs=inp, outputs=outp)
         model.compile(loss='binary_crossentropy', optimizer='adam', metrics=[f1])
-
         return model
 
     param_grid = dict(max_len=[max_len], max_features=[max_features], embedding_matrix=[embedding_matrix])
@@ -60,16 +59,16 @@ def bmdl_0(max_len, max_features, embedding_matrix):
 
 def bmdl_1(max_len, max_features, embedding_matrix):
     def build_fn(max_len, max_features, embedding_matrix):
-        embedding_dim = embedding_matrix[1]
+        embedding_dim = embedding_matrix.shape[1]
         inp = Input(shape=(max_len,))
         x = Embedding(input_dim=max_features, output_dim=embedding_dim, weights=[embedding_matrix], trainable=False)(
             inp)
-
-        x = Bidirectional(CuDNNLSTM(units=256, return_sequences=True))(x)
-        x = Bidirectional(CuDNNGRU(units=128))(x)
-
+        x = Bidirectional(CuDNNLSTM(128, return_sequences=True))(x)
+        x = Bidirectional(CuDNNLSTM(256))(x)
+        # x = SpatialDropout1D(rate = 0.1)(x)
+        x = Dropout(0.2)(x)
+        #
         x = Dense(units=56)(x)
-        x = Dropout(rate=0.1)(x)
         x = Dense(units=1)(x)
 
         model = Model(inputs=inp, outputs=x)
@@ -79,6 +78,26 @@ def bmdl_1(max_len, max_features, embedding_matrix):
     param_grid = dict(max_len=[max_len], max_features=[max_features], embedding_matrix=[embedding_matrix])
 
     return TrainTuple(index_name=1, build_fn=build_fn, param_grid=param_grid)
+
+
+def bmdl_2(max_len, max_features, embedding_matrix):
+    def build_fn(max_len, max_features, embedding_matrix):
+        embedding_dim = embedding_matrix.shape[1]
+        inp = Input(shape=(max_len,))
+        x = Embedding(max_features, embedding_dim, weights=[embedding_matrix])(inp)
+        x = Bidirectional(CuDNNGRU(64, return_sequences=True))(x)
+        x = Attention(max_len)(x)  # New
+        x = Dense(16, activation="relu")(x)
+        x = Dropout(0.1)(x)
+        x = Dense(1, activation="sigmoid")(x)
+        model = Model(inputs=inp, outputs=x)
+        model.compile(loss='binary_crossentropy', optimizer='adam', metrics=[f1])
+
+        return model
+
+    param_grid = dict(max_len=[max_len], max_features=[max_features], embedding_matrix=[embedding_matrix])
+
+    return TrainTuple(index_name=2, build_fn=build_fn, param_grid=param_grid)
 
 
 class Attention(Layer):
